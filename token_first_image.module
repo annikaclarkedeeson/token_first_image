@@ -1,0 +1,60 @@
+<?php
+/**
+ * @Fiele
+ * Provides a token that will produce the first image on a node.
+ */
+
+/**
+ * Implements hook_token_info().
+ */
+function token_first_image_token_info() {
+  $node = array();
+  $node['first-image'] = array(
+    'name' => t("First image"), 
+    'description' => t("The first image found on the node."),
+  );
+
+  return array(
+    'tokens' => array('node' => $node),
+  );
+}
+
+/**
+ * Implements hook_tokens().
+ */
+function token_first_image_tokens($type, $tokens, $data = array(), $options = array()) {
+  $replacements = array();
+
+  if ($type == 'node' && !empty($data['node'])) {
+    $node = $data['node'];
+    $lang = $node->language;
+
+    foreach ($tokens as $name => $original) {
+      if ($name == 'first-image') {
+        // Get all fields.
+        $fields = field_info_fields();
+
+        // Narrow down to images only.
+        foreach ($fields as $name => $field) {
+          if ($field['type'] == 'image' && $name != 'field_ad_image'){
+            $image_fields[$name] = $field;
+
+            // Check to see if the field is on the node.
+            if (property_exists($node, $name)) {
+
+              // Check to see if that field has a value.
+              if (isset($node->{$name}[$lang][0]['uri'])) {
+                // Generate a file path based on URI.
+                $replacements[$original] = file_create_url($node->{$name}[$lang][0]['uri']);
+                // Break out of the foreach loop.
+                break 2;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return $replacements;
+}

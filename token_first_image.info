@@ -1,0 +1,7 @@
+name = First image token
+description = Provides a token that will produce the first image on a node.
+core = 7.x
+version = 7.x-1.0
+
+dependancies[] = token
+dependancies[] = image
